@@ -1,0 +1,52 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-title>MyApp</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content>
+	<ion-card>
+		<ion-card-header>
+			<ion-card-subtitle>Welcome to MyApp</ion-card-subtitle>
+			<ion-card-title>Login</ion-card-title>
+		</ion-card-header>
+		<ion-card-content>
+			<form (ngSubmit)="onSubmit()" #authForm="ngForm">
+				<ion-item>
+					<ion-label position="stacked">E-Mail</ion-label>
+					<ion-input
+						required
+						placeholder="max@mustermann.com"
+						type="email"
+						inputmode="email"
+						[(ngModel)]="userEmail"
+						name="email"
+						#ngemai="ngModel"
+					></ion-input
+				></ion-item>
+				<ion-item>
+					<ion-label position="stacked">Password</ion-label>
+					<ion-input
+						required
+						type="password"
+						[(ngModel)]="userPassword"
+						name="password"
+						#password="ngModel"
+					></ion-input
+				></ion-item>
+				<ion-item lines="none">
+					<ion-label><small>Remember Password</small></ion-label>
+					<ion-checkbox slot="end" [(ngModel)]="remember" name="remember1"></ion-checkbox>
+				</ion-item>
+				<ion-button
+					color="primary"
+					type="submit"
+					class="btn btn-success"
+					[disabled]="!authForm.form.valid"
+				>
+					Submit
+				</ion-button>
+			</form>
+		</ion-card-content>
+	</ion-card>
+</ion-content>
