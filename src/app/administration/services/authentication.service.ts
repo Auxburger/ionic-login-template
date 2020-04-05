@@ -1,44 +1,52 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { tap, delay } from 'rxjs/operators';
-import { ServerConnectorService } from 'src/app/services/server-connector.service';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, isDevMode } from '@angular/core';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { NavController } from '@ionic/angular';
-
-const TOKEN_KEY = 'access-token';
-const REFRESH_TOKEN_KEY = 'refresh-token';
+import { environment } from 'src/environments/environment';
+import { User } from 'src/app/model/User';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
   readonly targetPath: string = 'your/path/to/login';
-  isLoggedIn = true;
+  private currentUserSubject: BehaviorSubject<User>;
+  public currentUser: Observable<User>;
 
-  // store the URL so we can redirect after logging in
-  redirectUrl: string;
+  // store the URL to redirect after successfully logging in
+  redirectUrl: string = '/';
 
-  constructor(private storage: Storage, private server: ServerConnectorService, private navCtrl: NavController) { }
+  constructor(private http: HttpClient, private router: Router) {
+    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser')));
+    this.currentUser = this.currentUserSubject.asObservable();
+  }
 
-  checkLogin() {
+  public isLoggedIn() {
+    return this.currentUserSubject.value != null;
+  }
 
+  public get currentUserValue(): User {
+    return this.currentUserSubject.value;
   }
 
   login(email: string, password: string): Observable<boolean> {
-    // parameters passed in body because of JWT
-    this.server.post<any>( this.targetPath, { email: email, password: password }).subscribe((data) => {
-      console.log('logging in..');
-      this.storage.set(TOKEN_KEY, data.access).then(() => {
-        this.storage.set(REFRESH_TOKEN_KEY, data.refresh).then(() => {
-          // this.authenticationState.next(true);
-          this.navCtrl.navigateRoot(['']);
-        });
-      });
-    }, () => {
-      console.log('login failed.');
-    });
+    if (isDevMode) {
+      this.storeCurrentUser({ name: "test", email: email });
+      return of(true);
+    }
   }
 
-  logout(): void {
-    this.isLoggedIn = false;
+  storeCurrentUser(user: User): void {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
+  logout() {
+    localStorage.removeItem('currentUser');
+    this.router.navigate(['account/login']);
+    this.redirectUrl = '/';
+    this.currentUserSubject.next(null);
   }
 }

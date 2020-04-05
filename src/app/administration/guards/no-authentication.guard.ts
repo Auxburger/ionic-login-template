@@ -14,17 +14,17 @@ export class NoAuthenticationGuard implements CanActivate, CanActivateChild {
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     let url: string = state.url;
-    return this.checkLogin(url);
+    return this.checkLoggedOut(url);
   }
 
-  checkLogin(url: string): boolean {
-    if (!this.authService.isLoggedIn) { return true; }
+  checkLoggedOut(url: string): boolean {
+    if (!this.authService.isLoggedIn()) { return true; }
 
     // Navigate to the login page with extras
     this.router.navigate(['/home']);
     return false;
   }
-  
+
   canActivateChild(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
