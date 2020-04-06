@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  baseUrl: "http://localhost:8100"
+  baseUrl: "http://localhost:8100" // TODO add your testing hosts address here 
 };
 
 /*

@@ -11,16 +11,17 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthenticationService {
-  readonly targetPath: string = 'your/path/to/login';
+  // In this case i used a UserSubject. One could convert that into a boolean one.
   private currentUserSubject: BehaviorSubject<User>;
-  public currentUser: Observable<User>;
+  private readonly USERITEM = 'currentUser';
 
+  defaultRedirectUrl = '/'
   // store the URL to redirect after successfully logging in
-  redirectUrl: string = '/';
+  redirectUrl: string = this.defaultRedirectUrl;
 
   constructor(private http: HttpClient, private router: Router) {
+    // this lets us recognize whether a user is already logged in
     this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('currentUser')));
-    this.currentUser = this.currentUserSubject.asObservable();
   }
 
   public isLoggedIn() {
@@ -32,21 +33,26 @@ export class AuthenticationService {
   }
 
   login(email: string, password: string): Observable<boolean> {
-    if (isDevMode) {
+    if (isDevMode) { // one could also replace this block by integrating a request to the test server
       this.storeCurrentUser({ name: "test", email: email });
       return of(true);
     }
+    // TODO add your login logic in here. You can of course adapt the return value, if needed.
   }
 
   storeCurrentUser(user: User): void {
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    localStorage.setItem(this.USERITEM, JSON.stringify(user));
     this.currentUserSubject.next(user);
   }
 
-  logout() {
-    localStorage.removeItem('currentUser');
-    this.router.navigate(['account/login']);
-    this.redirectUrl = '/';
+  removeCurrentUser(): void {
+    localStorage.removeItem(this.USERITEM);
     this.currentUserSubject.next(null);
+  }
+
+  logout() {
+    this.removeCurrentUser();
+    this.router.navigate(['account/login']);
+    this.redirectUrl = this.defaultRedirectUrl;
   }
 }
